@@ -48,11 +48,13 @@ func loadHSMPModule() error {
 	}
 
 	var errs []string
+	successCount := 0
 	for _, module := range hsmpModules {
 		cmd := exec.Command(modprobe, module)
 		out, cmdErr := cmd.CombinedOutput()
 		if cmdErr == nil {
-			return nil
+			successCount++
+			continue
 		}
 
 		detail := strings.TrimSpace(string(out))
@@ -61,6 +63,10 @@ func loadHSMPModule() error {
 			continue
 		}
 		errs = append(errs, fmt.Sprintf("%s: %v: %s", module, cmdErr, detail))
+	}
+
+	if successCount > 0 {
+		return nil
 	}
 
 	return fmt.Errorf("esmi: failed to load hsmp kernel module (%s)", strings.Join(errs, "; "))
