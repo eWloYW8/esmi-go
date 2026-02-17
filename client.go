@@ -54,6 +54,9 @@ func NewClient() (*Client, error) {
 	defer libMu.Unlock()
 
 	if clientRefs == 0 {
+		if err := ensureHSMPReady(); err != nil {
+			return nil, err
+		}
 		st := Init()
 		if !st.OK() {
 			return nil, &Error{Op: "Init", Status: st}
